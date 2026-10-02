@@ -207,12 +207,15 @@ Express 4 does not catch a rejected promise from an `async` route. `asyncHandler
 
 ## Add a resource
 
-1. Add a model to `prisma/schema.prisma`.
-2. Run `npx prisma migrate dev --name add_thing`.
-3. Add a Zod schema in `src/validators`.
-4. Add a service in `src/services`.
-5. Add a controller in `src/controllers`.
-6. Add a router in `src/routes` and mount it in `src/routes/index.ts`.
+Generate the empty controller, service, validator, and routes, and mount them under `/api`:
+
+```bash
+npm run make -- product
+```
+
+That creates `product.controller.ts`, `product.service.ts`, `product.validator.ts`, and `product.routes.ts`. Service methods throw `501` until you fill them in. Existing files are left as they are.
+
+Then add a model in `prisma/schema.prisma` and run `npx prisma migrate dev --name add_product`.
 
 Throw `new AppError("Message", 404)` from a service when the caller should see that message and status.
 
@@ -226,3 +229,4 @@ Throw `new AppError("Message", 404)` from a service when the caller should see t
 | `npm run typecheck` | Type-check without writing files |
 | `npm run db:generate` | Generate the Prisma client |
 | `npm run db:migrate` | Create and apply a development migration |
+| `npm run make -- product` | Scaffold an empty resource (controller, service, validator, routes) |
