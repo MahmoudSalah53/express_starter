@@ -192,15 +192,13 @@ Express 4 does not catch a rejected promise from an `async` route. `asyncHandler
 
 ## Add a resource
 
-Generate the empty controller, service, validator, and routes, and mount them under `/api`:
+Generate the empty controller, service, validator, routes, and Prisma model:
 
 ```bash
 npm run make -- product
 ```
 
-That creates `product.controller.ts`, `product.service.ts`, `product.validator.ts`, and `product.routes.ts`. Service methods throw `501` until you fill them in. Existing files are left as they are.
-
-Then add a model in `prisma/schema.prisma` with an integer id and run `npx prisma migrate dev --name add_product`:
+That creates `product.controller.ts`, `product.service.ts`, `product.validator.ts`, and `product.routes.ts`, and appends this model to `prisma/schema.prisma`:
 
 ```prisma
 model Product {
@@ -210,7 +208,7 @@ model Product {
 }
 ```
 
-Route ids are checked as positive integers.
+Add your fields to that model, then run `npx prisma migrate dev --name add_product`. Service methods throw `501` until you fill them in. Existing files and models are left as they are. Route ids are positive integers.
 
 Throw `new AppError("Message", 404)` from a service when the caller should see that message and status.
 
@@ -224,4 +222,4 @@ Throw `new AppError("Message", 404)` from a service when the caller should see t
 | `npm run typecheck` | Type-check without writing files |
 | `npm run db:generate` | Generate the Prisma client |
 | `npm run db:migrate` | Create and apply a development migration |
-| `npm run make -- product` | Scaffold an empty resource (controller, service, validator, routes) |
+| `npm run make -- product` | Scaffold an empty resource and a Prisma model |

@@ -121,8 +121,9 @@ for (const file of files) {
 }
 
 const registered = registerRoute();
+const modelAdded = registerModel();
 
-if (created === 0 && !registered) {
+if (created === 0 && !registered && !modelAdded) {
   console.log("Nothing new to add.");
 }
 
@@ -157,6 +158,27 @@ function registerRoute(): boolean {
   }
 
   return changed;
+}
+
+function registerModel(): boolean {
+  const schemaPath = path.join(root, "prisma/schema.prisma");
+  const source = fs.readFileSync(schemaPath, "utf8");
+
+  if (new RegExp(`^model ${pascal}\\b`, "m").test(source)) {
+    console.log(`Skipped model ${pascal} in prisma/schema.prisma (already exists)`);
+    return false;
+  }
+
+  const model = `model ${pascal} {
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+`;
+
+  fs.writeFileSync(schemaPath, `${source.trimEnd()}\n\n${model}`);
+  console.log(`Added model ${pascal} to prisma/schema.prisma`);
+  return true;
 }
 
 function capitalize(word: string): string {
