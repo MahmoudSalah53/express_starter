@@ -44,7 +44,7 @@ export const list${pluralPascal}: RequestHandler = async (_req, res) => {
 };
 
 export const get${pascal}: RequestHandler = async (req, res) => {
-  const item = await ${camel}Service.getById(req.params.id);
+  const item = await ${camel}Service.getById(Number(req.params.id));
   res.json({ status: "success", data: item });
 };
 
@@ -64,7 +64,7 @@ export const ${camel}Service = {
     throw new AppError("Not implemented", 501);
   },
 
-  getById(_id: string): Promise<unknown> {
+  getById(_id: number): Promise<unknown> {
     throw new AppError("Not implemented", 501);
   },
 
@@ -83,7 +83,7 @@ export const create${pascal}Schema = z.object({
 });
 
 export const ${camel}IdParamSchema = z.object({
-  id: z.string().cuid(),
+  id: z.coerce.number().int().positive(),
 });
 
 export type Create${pascal}Input = z.infer<typeof create${pascal}Schema>;

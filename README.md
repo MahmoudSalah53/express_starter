@@ -2,7 +2,7 @@
 
 A small Express.js API starter in TypeScript. It is ready to run in production, and it stays small on purpose.
 
-The `User` routes are a sample resource. They show how a request moves through the project. They are not an authentication system.
+The starter ships with a health check only. Add your own resources when you need them. Ids are integers.
 
 ## Stack
 
@@ -34,11 +34,13 @@ npm install
 cp .env.example .env
 ```
 
-3. Create the database, then apply the migration:
+3. Generate the Prisma client:
 
 ```bash
-npx prisma migrate dev
+npx prisma generate
 ```
+
+There is no database model yet. After you add one, create the database and run `npx prisma migrate dev`.
 
 4. Start the API:
 
@@ -52,14 +54,6 @@ Check that it is up:
 
 ```bash
 curl http://localhost:3000/api/health
-```
-
-Create a user (Postgres must be running):
-
-```bash
-curl -X POST http://localhost:3000/api/users \
-  -H "Content-Type: application/json" \
-  -d "{\"email\":\"ada@example.com\",\"name\":\"Ada\"}"
 ```
 
 Production:
@@ -153,9 +147,6 @@ Routes only declare the URL, the validation schema, and the controller. `src/rou
 | Method | Path | Purpose |
 | --- | --- | --- |
 | `GET` | `/api/health` | Process is running. Does not query the database |
-| `GET` | `/api/users` | List users |
-| `GET` | `/api/users/:id` | Get one user |
-| `POST` | `/api/users` | Create a user |
 
 ### Controllers
 
@@ -167,17 +158,11 @@ Controllers take the HTTP request and return JSON. They do not talk to Prisma di
 
 ### Services
 
-Services hold the work: queries, checks, and expected failures. `userService.getById` throws `AppError` with status `404` when the id does not exist. A duplicate email is left for Prisma and mapped to `409` in the error middleware.
+Services hold the work: queries, checks, and expected failures. Throw `AppError` with status `404` when a record does not exist. A Prisma unique constraint is mapped to `409` in the error middleware.
 
 ### Validation
 
 `validate({ body, query, params })` runs a Zod schema and replaces the matching request field with the parsed value. Invalid input throws `ZodError`.
-
-Example body for `POST /api/users`:
-
-```json
-{ "email": "ada@example.com", "name": "Ada" }
-```
 
 A bad body returns `400`:
 
@@ -193,7 +178,7 @@ A bad body returns `400`:
 
 Express 4 does not catch a rejected promise from an `async` route. `asyncHandler` forwards that rejection to the error middleware.
 
-`AppError` is for failures you expect, such as a missing user. Anything else is treated as an unexpected `500`. The client receives `Internal server error`. The real error is logged. In development, the JSON body also includes `stack`.
+`AppError` is for failures you expect, such as a missing record. Anything else is treated as an unexpected `500`. The client receives `Internal server error`. The real error is logged. In development, the JSON body also includes `stack`.
 
 | Case | Status |
 | --- | --- |
@@ -215,7 +200,17 @@ npm run make -- product
 
 That creates `product.controller.ts`, `product.service.ts`, `product.validator.ts`, and `product.routes.ts`. Service methods throw `501` until you fill them in. Existing files are left as they are.
 
-Then add a model in `prisma/schema.prisma` and run `npx prisma migrate dev --name add_product`.
+Then add a model in `prisma/schema.prisma` with an integer id and run `npx prisma migrate dev --name add_product`:
+
+```prisma
+model Product {
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+```
+
+Route ids are checked as positive integers.
 
 Throw `new AppError("Message", 404)` from a service when the caller should see that message and status.
 
