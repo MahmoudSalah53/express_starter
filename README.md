@@ -17,8 +17,9 @@ The starter ships with a health check only. Add your own resources when you need
 | Helmet | Sets secure HTTP headers |
 | CORS | Allows a configured browser origin |
 | Pino | Structured logs. Pretty-printed in development |
+| Swagger UI | API docs at `/api/docs` |
 
-Authentication, rate limiting, Swagger, tests, and Docker are left out until you need them.
+Authentication, rate limiting, tests, and Docker are left out until you need them.
 
 ## Setup
 
@@ -56,6 +57,8 @@ Check that it is up:
 curl http://localhost:3000/api/health
 ```
 
+Open the docs at `http://localhost:3000/api/docs`. Only `GET /api/health` is documented.
+
 Production:
 
 ```bash
@@ -92,6 +95,7 @@ src/
     env.ts                  loads and checks environment variables
     logger.ts               application logger
     database.ts             shared Prisma client
+    swagger.ts              OpenAPI document for Swagger UI
   routes/                   maps URLs to controllers
   controllers/              reads the request and sends the response
   services/                 business logic and database calls
@@ -147,6 +151,7 @@ Routes only declare the URL, the validation schema, and the controller. `src/rou
 | Method | Path | Purpose |
 | --- | --- | --- |
 | `GET` | `/api/health` | Process is running. Does not query the database |
+| `GET` | `/api/docs` | Swagger UI for the documented routes |
 
 ### Controllers
 
